@@ -1,69 +1,137 @@
-<canvas id="gc" width="400" height="400"></canvas>
-<script>
-    window.onload = function () {
-        canv = document.getElementById("gc");
-        ctx = canv.getContext("2d");
-        document.addEventListener("keydown", keyPush);
-        setInterval(game, 1000 / 15);
-    }
-    px = py = 10;
-    gs = tc = 20;
-    ax = ay = 15;
-    xv = yv = 0;
-    trail = [];
-    tail = 5;
-    function game() {
-        px += xv;
-        py += yv;
-        if (px < 0) {
-            px = tc - 1;
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title></title>
+</head>
+<body>
+    <div id="points">0</div>
+    <div id="records"></div>
+    <canvas id="gc" width="400" height="400"></canvas>
+    <script>
+        window.onload = function () {
+            score = document.getElementById("points");
+            recordScore = document.getElementById("records");
+            canv = document.getElementById("gc");
+            ctx = canv.getContext("2d");
+            document.addEventListener("keydown", keyPush);
+            setInterval(game, 1000 / 10);
         }
-        if (px > tc - 1) {
-            px = 0;
-        }
-        if (py < 0) {
-            py = tc - 1;
-        }
-        if (py > tc - 1) {
-            py = 0;
-        }
-        ctx.fillStyle = "black";
-        ctx.fillRect(0, 0, canv.width, canv.height);
+        points = 0;
+        records = [];
+        px = py = 10;
+        gs = tc = 20;
+        ax = ay = 15;
+        xv = yv = 0;
+        trail = [];
+        tail = 1;
+        function game() {
+            px += xv;
+            py += yv;
+            if (px < 0) {
+                px = tc - 1;
+            }
+            if (px > tc - 1) {
+                px = 0;
+            }
+            if (py < 0) {
+                py = tc - 1;
+            }
+            if (py > tc - 1) {
+                py = 0;
+            }
+            ctx.fillStyle = "black";
+            ctx.fillRect(0, 0, canv.width, canv.height);
 
-        ctx.fillStyle = "lime";
-        for (var i = 0; i < trail.length; i++) {
-            ctx.fillRect(trail[i].x * gs, trail[i].y * gs, gs - 2, gs - 2);
-            if (trail[i].x == px && trail[i].y == py) {
-                tail = 5;
+            ctx.fillStyle = "lime";
+            for (var i = 0; i < trail.length; i++) {
+                ctx.fillRect(trail[i].x * gs, trail[i].y * gs, gs - 2, gs - 2);
+                if (trail[i].x == px && trail[i].y == py) {
+                    tail = 1;
+                }
+            }
+
+            trail.push({ x: px, y: py });
+            while (trail.length > tail) {
+                trail.shift();
+            }
+
+            if (ax == px && ay == py) {
+                points++
+                tail++;
+                ax = Math.floor(Math.random() * tc);
+                ay = Math.floor(Math.random() * tc);
+            }
+
+            if(points > 0) {
+                updateScore(records, points)
+            }
+
+            ctx.fillStyle = "red";
+            ctx.fillRect(ax * gs, ay * gs, gs - 2, gs - 2);
+        }
+
+        function updateScore(){
+            if (tail == 1) {
+                updateRecord(records, points)
+                points = 0;
+            }
+            score.innerHTML = points;
+        } 
+
+        function updateRecord(arrRecords, point){
+            if(arrRecords.length == 0) {
+                arrRecords.push(point);
+            }
+
+            if (point > arrRecords[0]) {
+                if (arrRecords.length == 5) {
+                    arrRecords.pop();
+                }
+                arrRecords.push(point);
+            }           
+
+            arrRecords.sort(function(a, b){
+                if (a > b) {
+                    return -1   
+                }
+                
+                if (a < b) {
+                    return +1
+                }
+            });
+            recordsHtml(arrRecords);
+        }
+
+        function recordsHtml(arrRecords){
+            if (arrRecords.length == 0){
+                return false
+            } 
+            recordScore.innerHTML = ''
+
+            arrRecords.forEach(record => {
+                recordScore.innerHTML += `<div>${record}</div>`
+            });
+        }
+
+        function keyPush(evt) {
+            switch (evt.keyCode) {
+                case 37:
+                    xv = -1; yv = 0;
+                    break;
+                case 38:
+                    xv = 0; yv = -1;
+                    break;
+                case 39:
+                    xv = 1; yv = 0;
+                    break;
+                case 40:
+                    xv = 0; yv = 1;
+                    break;
             }
         }
-        trail.push({ x: px, y: py });
-        while (trail.length > tail) {
-            trail.shift();
-        }
+    </script>
 
-        if (ax == px && ay == py) {
-            tail++;
-            ax = Math.floor(Math.random() * tc);
-            ay = Math.floor(Math.random() * tc);
-        }
-        ctx.fillStyle = "red";
-        ctx.fillRect(ax * gs, ay * gs, gs - 2, gs - 2);
-    }
-    function keyPush(evt) {
-        switch (evt.keyCode) {
-            case 37:
-                xv = -1; yv = 0;
-                break;
-            case 38:
-                xv = 0; yv = -1;
-                break;
-            case 39:
-                xv = 1; yv = 0;
-                break;
-            case 40:
-                xv = 0; yv = 1;
-                break;
-        }
-    }
-</script>
+</body>
+</html>
